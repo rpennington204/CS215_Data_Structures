@@ -95,7 +95,7 @@ public class Ult_SList {
 		while (iterPos != ListEnd) {
 			System.out.print(iterPos.item);
 			if (iterPos.next != ListEnd)
-				System.out.print(", ");
+				System.out.print(", s");
 			iterPos = iterPos.next;	
 		}				
 		System.out.println(")");
