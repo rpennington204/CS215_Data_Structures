@@ -35,7 +35,5 @@ public class Ar_Stack <T> {
 	T peek() { 
 		  return StackItems[top]; 
 	}
-
 	
-
 }
