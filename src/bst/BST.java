@@ -1,132 +1,262 @@
 package bst;
 
+import stackqueue.CL_Queue;
+
 public class BST {
-	private class TNode {
+
+	private class TNode
+	{
 		public int item;
-		public TNode left;
-		public TNode right;
-		public TNode(int newitem) {
-			item = newitem;
-			left = null;
-			right = null;
-		}
+	    public TNode left;
+	    public TNode right;
+
+	    //--------------------------------------------------------------
+	    //  Sets up the node
+	    //--------------------------------------------------------------
+	    public TNode(int newitem)
+	    {
+	    	item = newitem;
+	    	left = null;
+	    	right = null;
+	    }
 	}
-	
 	private TNode root;
+	CL_Queue travQueue;	
 	
 	public BST() {
-		root = null;
+		root = null;	
+		travQueue=new CL_Queue();
 	}
 	
-	private TNode insert(TNode curnode, int newitem) {
-		if (curnode == null) {
-			return new TNode(newitem);
+	public BST(TNode cpNode) {
+		root = cpNode;	
+		travQueue=new CL_Queue();
+	}
+	
+	private int countNodes(TNode curnode) { //Return total number of nodes in (sub-)tree denoted by curnode
+		  if (curnode == null)
+		    return 0;
+		  else 
+		    return countNodes(curnode.left) + countNodes(curnode.right) + 1;
 		}
-		else if (newitem < curnode.item) {
-			curnode.left = insert(curnode.left, newitem);
-		}
-		else {
-			curnode.right = insert(curnode.right, newitem);
-		}
-		return curnode;
+
+	public int getLength()
+	// Calls recursive function CountNodes to count the 
+	// nodes in the tree.
+	{
+		return countNodes(root);
+	}
+
+	public boolean isEmpty()
+	// Returns true if the tree is empty; false otherwise.
+	{
+		return root == null;
+	}
+		  
+	private TNode insert (TNode curnode, int newitem) { //Helper function to insert an item into (sub-)tree denoted by curnode
+	  if (curnode==null) {
+	    curnode = new TNode(newitem);
+	    return curnode;
+	  } else if (newitem<curnode.item)
+	    curnode.left = insert(curnode.left,newitem);
+	  else
+	    curnode.right = insert(curnode.right,newitem);
+	  return curnode;
 	}
 	
 	public void putItem(int newitem) {
-		root = insert(root, newitem);
-	}
+		root = insert(root,newitem);
+	}  
 	
-	private int findItem (TNode curnode, int gitem) {
-		if (curnode == null) {
-			return Integer.MIN_VALUE;
-		}
-		else if (gitem == curnode.item) {
-			return curnode.item;
-		}
-		else if (gitem < curnode.item) {
-			return findItem(curnode.left, gitem);
-		}
-		else {
-			return findItem(curnode.right, gitem);
-		}
+		  
+	private int findItem(TNode curnode, int gitem) { //Helper function to locate an item in (sub-)tree denoted by curnode
+	  if (curnode == null)
+	    return -1;
+	  else if (gitem == curnode.item)
+	    return curnode.item;
+	  else if (gitem < curnode.item)
+	    return findItem(curnode.left,gitem);
+	  else
+	    return findItem(curnode.right,gitem);
 	}
-	
+
 	public int getItem(int gitem) {
-		return findItem(root, gitem);
+	  return findItem(root, gitem);
 	}
 	
-	public boolean isEmpty() {
-		return root == null;
-	}
-	
-	private void printNodes(TNode curnode) {
-		if (curnode != null) {
-			printNodes(curnode.left);
-			System.out.print(curnode.item + ", ");
-			printNodes(curnode.right);
-		}
-	}
-	
-	public void printTree() {
-		if (isEmpty()) 
-			System.out.println("Emptry Tree");
-		else { 
-			printNodes(root);
-			System.out.println("\b\b");
-		}
-	}
-	
-	private TNode delete(TNode curnode, int ditem) {
-		if (ditem < curnode.item) //must check the left subtree
-	        curnode.left = delete(curnode.left, ditem);   
-	    else if (ditem > curnode.item) //must check right subtree
-	        curnode.right = delete(curnode.right, ditem);  
-	    else //node has been located
-	        curnode = deleteNode(curnode, ditem);
-	    return curnode;
-	}
-	
-	private TNode deleteNode(TNode delnode, int ditem) { 
-	    if (delnode.left == null) { 					      
-	        return delnode.right;
-	    } 
-	    else if (delnode.right == null) {                                            	              
-	    	return delnode.left;
-	    }
-	    else {
-	        TNode predecessor = delnode.left;
-	        while (predecessor.right != null) {	
-	            predecessor = predecessor.right;
-	        }
-	        int replaceitem = predecessor.item;
-	        delnode.item = replaceitem;
-	        delnode.left = delete(delnode.left, replaceitem);
-	            return delnode;
-	    } 
+	private TNode deleteNode(TNode delnode, int ditem) { //Helper function to delete an actual node
+		  
+		  if (delnode.left == null) { //If left child is null, we can replace with right child (whether NULL or not!)
+		    return delnode.right;
+		  } else if (delnode.right == null) { //Check to see if other easy case applies (right child is NULL, but left is not)
+		    return delnode.left;
+		  } else { //Difficult case -- we need to replace item with that of the logical predecessor
+		    TNode predecessor = delnode.left;
+		    while (predecessor.right != null) {	
+		      predecessor = predecessor.right;
+		    }
+		    int replaceitem = predecessor.item;
+		    delnode.item = replaceitem;
+		    delnode.left = delete(delnode.left, replaceitem);
+		    return delnode;
+		  }     
+		  
 	}
 
-	
+
+
+	private TNode delete(TNode curnode, int ditem) { //Helper function to delete an item in (sub-)tree denoted by curnode
+	  if (ditem < curnode.item)
+	    curnode.left = delete(curnode.left, ditem);   // Look in left subtree.
+	  else if (ditem > curnode.item)
+	    curnode.right = delete(curnode.right, ditem);  // Look in right subtree.
+	  else
+	    curnode = deleteNode(curnode, ditem);           // Node found; call DeleteNode.
+	  return curnode;
+	}   
+
+
 	public void deleteItem(int ditem) {
-		root = delete(root, ditem);
+	  delete(root,ditem);
+	}
+
+	public void printNodes(TNode curnode) { // Prints items in (sub-)tree in sorted order
+	  if (curnode != null) {
+	    printNodes(curnode.left);   // Print left subtree.
+	    System.out.print(curnode.item + ", ");
+	    printNodes(curnode.right);   // Print right subtree.
+	  }
+	}
+
+	public void printTree() {// Calls recursive function PrintNodes to print items in the tree.
+	  if (isEmpty())
+	    System.out.println("(Empty Tree)");
+	  else {
+	    printNodes(root);
+	    System.out.println("\b\b   ");
+	  }
+	}
+
+	private TNode copyNodes(TNode origNode) {	  
+	  if (origNode == null)
+	    return null;
+	  else {
+	    TNode copyNode = new TNode(origNode.item);
+	    copyNode.left = copyNodes(origNode.left);
+	    copyNode.right = copyNodes(origNode.right);
+	    return copyNode; 
+	  }
+	}
+
+	public BST copy() { //Constructor that calls recursive function CopyNodes to copy original tree into root		
+		TNode newroot = copyNodes(root);
+		BST cpBSTE = new BST(newroot);
+		return cpBSTE;
+	}
+		
+	public boolean travEmpty() {
+		return travQueue.isEmpty();	
+	}
+
+	private void preNodes(TNode curNode) {    
+	  if (curNode != null) {
+	    travQueue.enqueue(curNode.item);		    
+		preNodes(curNode.left);    
+	    preNodes(curNode.right);
+	  }
+	}
+
+	private void inNodes(TNode curNode) {    
+	  if (curNode != null) {
+		inNodes(curNode.left);
+		travQueue.enqueue(curNode.item);		    
+	    inNodes(curNode.right);
+	  }
 	}
 	
-	private TNode copyNodes(TNode origNode) {	  
-	    if (origNode == null)
-	        return null;
-	    else {
-	        TNode copyNode = new TNode(origNode.item);
-	        copyNode.left = copyNodes(origNode.left);
-	        copyNode.right = copyNodes(origNode.right);
-	        return copyNode; 
-	    }
+	private void postNodes(TNode curNode) {    
+	  if (curNode != null) {
+		postNodes(curNode.left);
+	    postNodes(curNode.right);
+		travQueue.enqueue(curNode.item);		    
+	  }
+	}
+	
+	private void reverseNodes(TNode curNode) {
+		if (curNode != null) {
+			reverseNodes(curNode.right);
+			travQueue.enqueue(curNode.item);
+			reverseNodes(curNode.left);
+		}
+	}
+	
+	public int getNextItem() throws Exception {
+		if (travQueue.isEmpty())
+		  return Integer.MIN_VALUE;
+		else
+		  return travQueue.dequeue();
 	}
 
-	public BST(TNode cpNode) {
-	    root = cpNode;	
+	public void resetTree(String order) {
+	// Calls function to create a queue of the tree elements in 
+	// the desired order.
+	  travQueue.makeEmpty();  
+	  switch (order) {
+	    case "PRE" : preNodes(root);
+	    	break;
+	    case "IN" : inNodes(root);
+    		break;
+	    case "POST" : postNodes(root);
+    		break;
+	    case "REVERSE" : reverseNodes(root);
+	    	break;
+      }
+	  
 	}
+	
+	public void splitBalance() throws Exception {
+		int treeLength = getLength();
+		int[] myElements = new int [treeLength];
+		resetTree("IN");
+		for (int i = 0; i < treeLength; i ++) {
+			myElements[i] = getNextItem();
+		}
+		root = null;
+		SBHelper(myElements, 0, treeLength - 1);
+	}
+	
+	private void SBHelper(int[] myElements, int lindex, int rindex) {
+		if (rindex-lindex >= 0) {
+			int midpoint = (rindex + lindex)/2;
+			putItem(myElements[midpoint]);
+			SBHelper(myElements,lindex,midpoint-1);
+			SBHelper(myElements,midpoint+1,rindex);
+		}
+	}
+	
+	//
+	//Homework 3 getHeight function
+	//
+	
+	public int getHeight() {
+		return searchHeight(root);
+	}
+	
+	private int searchHeight(TNode curNode) { 
+		if (curNode == null) {
+			return -1;
+		}
 
-	public BST copy() {    
-		TNode newroot = copyNodes(root);
-	    BST cpBSTE = new BST(newroot);
-	    return cpBSTE; 
+		int leftheight = searchHeight(curNode.left);
+		int rightheight = searchHeight(curNode.right);
+		return Math.max(leftheight, rightheight) + 1;
+		
+		
 	}
+	
+	
+	
+	
+
+		
 }
